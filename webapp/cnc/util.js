@@ -50,6 +50,13 @@ define(function () {
             if (res > twoPi)
                 return res - twoPi;
             return res;
+        },
+        dot: function (other) {
+            return this.x * other.x + this.y * other.y + this.z * other.z;
+        },
+        matrixed: function (rowMajorMatrix) {
+            const resultRows = rowMajorMatrix.map(row=>new Point(...row).dot(this));
+            return new Point(...resultRows)
         }
     };
     [
@@ -60,15 +67,15 @@ define(function () {
         ['1', 'y'],
         ['2', 'z']
     ].forEach(function (mapping) {
-            Object.defineProperty(Point.prototype, mapping[0], {
-                get: function () {
-                    return this[mapping[1]];
-                },
-                set: function (newValue) {
-                    this[mapping[1]] = newValue;
-                }
-            });
+        Object.defineProperty(Point.prototype, mapping[0], {
+            get: function () {
+                return this[mapping[1]];
+            },
+            set: function (newValue) {
+                this[mapping[1]] = newValue;
+            }
         });
+    });
 
     function toggleClass(svgElement, className, toggle) {
         var classAttr = svgElement.attr('class');

@@ -219,9 +219,29 @@ define(['cnc/util', 'cnc/cam/cam', 'clipper', 'libs/jsparse'], function (util, c
                 var y = parseDistance(params[4]);
                 return createCircle(diameter / 2, new util.Point(x, y));
             },
-            '2': function (params) {
+            '20': function (params) {
                 console.log('Vector Line', params);
-                return [];
+                var w = parseDistance(params[2]);
+                var startX = parseDistance(params[3]);
+                var startY = parseDistance(params[4]);
+                var endX = parseDistance(params[5]);
+                var endY = parseDistance(params[6]);
+                var angle = parseFloat(params[6]);
+                const p1 = new util.Point(startX, startY);
+                const p2 = new util.Point(endX, endY);
+                const dir  = p2.sub(p1).normalized();
+                const wDir = new util.Point(-dir.y, dir.x).scale(w/2);
+                let rectangle = [p1.sub(wDir), p2.sub(wDir), p2.add(wDir), p1.add(wDir), p1.sub(wDir)];
+                if (angle !== 0) {
+                    const angleRadians = angle * Math.PI / 180
+                    let cos = Math.cos(angleRadians);
+                    let sin = Math.sin(angleRadians);
+                    const rotationMatrix = [[cos, -sin], [sin, cos]];
+                    const rotatePoint = (p) => p.matrixed(rotationMatrix)
+                    rectangle = rectangle.map(rotatePoint)
+                }
+
+                return rectangle;
             },
             '21': function (params) {
                 console.log('Center Line', params);
@@ -230,9 +250,17 @@ define(['cnc/util', 'cnc/cam/cam', 'clipper', 'libs/jsparse'], function (util, c
                 var x = parseDistance(params[4]);
                 var y = parseDistance(params[5]);
                 var angle = parseFloat(params[6]);
-                if (angle != 0)
-                    throw new Error('angle != 0 is not yet supported (was ' + angle + '°)');
-                return createRectangle(w, h, new util.Point(x, y));
+                let rectangle = createRectangle(w, h, new util.Point(x, y));
+                if (angle !== 0) {
+                    const angleRadians = angle * Math.PI / 180
+                    let cos = Math.cos(angleRadians);
+                    let sin = Math.sin(angleRadians);
+                    const rotationMatrix = [[cos, -sin], [sin, cos]];
+                    const rotatePoint = (p) => p.matrixed(rotationMatrix)
+                    rectangle = rectangle.map(rotatePoint)
+                }
+
+                return rectangle;
             },
             '22': function (params) {
                 var w = parseDistance(params[2]);
@@ -548,8 +576,7 @@ define(['cnc/util', 'cnc/cam/cam', 'clipper', 'libs/jsparse'], function (util, c
             if (!parser) {
                 console.log('unrecognized file', command);
                 throw new Error('unrecognized file');
-            }
-            else
+            } else
                 return parser(command);
         }
 
