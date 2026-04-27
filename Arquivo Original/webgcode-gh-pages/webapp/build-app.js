@@ -1,6 +1,6 @@
 ({
     baseUrl: ".",
-    name: "controllerEmber",
-    out: "controllerEmber-built.js",
+    name: "legacy/controllerEmber",
+    out: "legacy/controllerEmber-built.js",
     mainConfigFile: 'config.js'
 })

@@ -1,5 +1,11 @@
 requirejs.config({
     paths: {
+        'cnc/app': 'legacy/cnc/app',
+        'cnc/cad': 'legacy/cnc/cad',
+        'cnc/cam': 'legacy/cnc/cam',
+        'cnc/controller': 'legacy/cnc/controller',
+        'cnc/import': 'legacy/cnc/import',
+        'cnc/maths': 'legacy/cnc/maths',
         text: 'libs/require_text',
         shader: 'require_shader',
         Ember: "libs/ember.min",
@@ -16,7 +22,8 @@ requirejs.config({
         base64: 'libs/deflate/base64',
         Piecon: 'libs/piecon.min',
         Sortable: 'libs/Sortable.min',
-        SVG: 'libs/svg'
+        SVG: 'libs/svg',
+        templates: 'legacy/templates'
     },
     shim: {
         jQuery: {exports: '$'},
