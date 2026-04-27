@@ -103,7 +103,8 @@
         the right.<br>
         The right-hand pane are interactive, drag them to change the point of view.
     </p>
-    <p>There is also a rudimentary <a href="webapp/visucamTest.html">toolpath generator</a>.</p>
+    <p>Legacy CAM, controller and electronics resources have been separated into dedicated legacy folders so this main
+        page stays focused on the G-code interpreter and 2D/3D simulator.</p>
 
     <div id="app">
 
@@ -138,14 +139,67 @@ G3 Z50 J0 K5
 G17 (back to X-Y plane)
 </script>
     <script>
-        require(['Ember', 'cnc/ui/graphicView', 'cnc/cam/cam', 'cnc/util', 'cnc/ui/gcodeEditor', 'cnc/gcode/gcodeSimulation', 'templates'],
-            function (Ember, GraphicView, cam, util, gcodeEditor, gcodeSimulation) {
+        require(['Ember', 'cnc/ui/graphicView', 'cnc/util', 'cnc/ui/gcodeEditor', 'cnc/gcode/gcodeSimulation'],
+            function (Ember, GraphicView, util, gcodeEditor, gcodeSimulation) {
                 var demoCode = $('#demoCode').text();
 
                 Ember.Handlebars.helper('num', function (value) {
                     return new Handlebars.SafeString(Handlebars.Utils.escapeExpression(util.formatCoord(value)));
                 });
-                Ember.TEMPLATES['application'] = Ember.TEMPLATES['camApp'];
+                Ember.TEMPLATES['jobView'] = Ember.Handlebars.compile([
+                    '<div>',
+                    '    <dl>',
+                    '        <dt>Total Duration:</dt>',
+                    '        <dd {{bind-attr title=formattedTotalTime.detailed}}>{{formattedTotalTime.humanized}}</dd>',
+                    '    </dl>',
+                    '    <dl>',
+                    '        <dt>Bounds (@tool center):</dt>',
+                    '        <dd>',
+                    '            <table class="boundsTable" style="text-align:right;">',
+                    '                <thead>',
+                    '                <tr>',
+                    '                    <th>&nbsp;</th>',
+                    '                    <th>min</th>',
+                    '                    <th>max</th>',
+                    '                </tr>',
+                    '                </thead>',
+                    '                <tbody>',
+                    '                <tr>',
+                    '                    <th>X</th>',
+                    '                    <td>{{num bbox.min.x}}</td>',
+                    '                    <td>{{num bbox.max.x}}</td>',
+                    '                </tr>',
+                    '                <tr>',
+                    '                    <th>Y</th>',
+                    '                    <td>{{num bbox.min.y}}</td>',
+                    '                    <td>{{num bbox.max.y}}</td>',
+                    '                </tr>',
+                    '                <tr>',
+                    '                    <th>Z</th>',
+                    '                    <td>{{num bbox.min.z}}</td>',
+                    '                    <td>{{num bbox.max.z}}</td>',
+                    '                </tr>',
+                    '                </tbody>',
+                    '            </table>',
+                    '        </dd>',
+                    '    </dl>',
+                    '</div>'
+                ].join(''));
+                Ember.TEMPLATES['application'] = Ember.Handlebars.compile([
+                    '{{view "Simulator.GraphicView"}}',
+                    '<div class="editBlock">',
+                    '    <p><strong>About this page:</strong> main workspace for writing G-code, running the interpreter and',
+                    '        previewing the resulting toolpath in 2D and 3D.</p>',
+                    '    {{gcode-editor content=code annotations=errors currentRow=currentRow}}',
+                    '    <button {{action "simulate"}} {{bind-attr disabled=computing}}>Simulate</button>',
+                    '    <button {{action "loadBigSample"}} {{bind-attr disabled=computing}}>Load a bigger sample</button>',
+                    '    {{#if computing}}',
+                    '        <div id="loader">&nbsp;</div>',
+                    '    {{else}}',
+                    '        {{partial "jobView"}}',
+                    '    {{/if}}',
+                    '</div>'
+                ].join(''));
 
                 window.Simulator = Ember.Application.create({
                     rootElement: '#app'

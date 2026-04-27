@@ -27,7 +27,7 @@
     "pages": ["js_sandbox.html"]
   },
   "icons": {
-    "48": "images/icon_fraise_48.png",
-    "128": "images/icon_fraise_128.png"
+    "48": "../images/icon_fraise_48.png",
+    "128": "../images/icon_fraise_128.png"
   }
 }

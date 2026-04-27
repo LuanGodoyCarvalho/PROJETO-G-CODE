@@ -1,5 +1,23 @@
 "use strict";
-define(['Ember', 'cnc/ui/threeDView', 'cnc/ui/twoDView', 'cnc/cam/cam'], function (Ember, threeD, TwoDView, cam) {
+define(['Ember', 'cnc/ui/threeDView', 'cnc/ui/twoDView', 'libs/simplify'], function (Ember, threeD, TwoDView, simplify) {
+    function simplifyScaleAndCreatePathDef(polygons, scale, tolerance, closed) {
+        polygons = polygons.map(function (poly) {
+            return simplify(poly, tolerance * scale, true);
+        });
+        var d = '';
+        polygons.forEach(function (poly) {
+            if (poly.length) {
+                var firstPoint = poly[0];
+                d += ' M ' + firstPoint.X / scale + ',' + firstPoint.Y / scale;
+                for (var i = 1; i < poly.length; i++)
+                    d += ' L ' + poly[i].X / scale + ',' + poly[i].Y / scale;
+                if (closed)
+                    d += 'Z';
+            }
+        });
+        return d;
+    }
+
     var GraphicView = Ember.ContainerView.extend({
         classNames: ['viewContainer'],
         init: function () {
@@ -105,7 +123,7 @@ define(['Ember', 'cnc/ui/threeDView', 'cnc/ui/twoDView', 'cnc/cam/cam'], functio
             var vertices = new Float32Array(fragment.vertices);
             for (var i = 0; i < vertices.length; i += 3)
                 polyline.push({X: vertices[i], Y: vertices[i + 1]});
-            return parent.path(cam.simplifyScaleAndCreatePathDef([polyline], 1, 0.001, false))
+            return parent.path(simplifyScaleAndCreatePathDef([polyline], 1, 0.001, false))
                 .attr({class: 'toolpath ' + (fragment.speedTag == 'rapid' ? 'rapidMove' : 'normalMove')});
         },
         highlightChanged: function () {
@@ -117,7 +135,7 @@ define(['Ember', 'cnc/ui/threeDView', 'cnc/ui/twoDView', 'cnc/cam/cam'], functio
             }
             if (highlight) {
                 currentHighlight = this.get('nativeComponent.overlay')
-                    .path(cam.simplifyScaleAndCreatePathDef([highlight.map(function (point) {
+                    .path(simplifyScaleAndCreatePathDef([highlight.map(function (point) {
                         return {X: point.x, Y: point.y};
                     })], 1, 0.001, false))
                     .attr({fill: 'none', 'stroke': '#FF00FF', 'stroke-width': 6, 'stroke-linecap': 'round'});
